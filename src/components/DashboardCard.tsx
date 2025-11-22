@@ -32,8 +32,8 @@ export const DashboardCard = ({
   return (
     <Card
       className={cn(
-        "group relative cursor-pointer transition-all duration-300 hover:shadow-lg hover:scale-[1.02] overflow-hidden",
-        "border-2 border-border",
+        "group relative cursor-pointer transition-all duration-300 hover:shadow-xl hover:scale-[1.03] overflow-hidden",
+        "border-3 border-border rounded-2xl",
         className
       )}
       onClick={onClick}
@@ -41,26 +41,26 @@ export const DashboardCard = ({
       {/* Icon background with status color */}
       <div
         className={cn(
-          "absolute top-0 right-0 w-32 h-32 -mr-8 -mt-8 rounded-full opacity-10 transition-opacity duration-300 group-hover:opacity-20",
+          "absolute top-0 right-0 w-40 h-40 -mr-10 -mt-10 rounded-full opacity-15 transition-opacity duration-300 group-hover:opacity-25",
           statusColors[status]
         )}
       />
 
-      <div className="p-6 relative z-10">
+      <div className="p-8 relative z-10">
         {/* Header with icon and badge */}
-        <div className="flex items-start justify-between mb-4">
+        <div className="flex items-start justify-between mb-6">
           <div
             className={cn(
-              "p-4 rounded-xl transition-colors duration-300",
+              "p-5 rounded-2xl transition-colors duration-300 shadow-md",
               statusColors[status]
             )}
           >
-            <Icon className="w-8 h-8 text-white" strokeWidth={2.5} />
+            <Icon className="w-10 h-10 text-white" strokeWidth={2.5} />
           </div>
           {pendingCount !== undefined && pendingCount > 0 && (
             <Badge
               variant="destructive"
-              className="text-base font-bold px-3 py-1 min-w-[2.5rem] justify-center"
+              className="text-lg font-bold px-4 py-2 min-w-[3rem] justify-center shadow-lg animate-pulse"
             >
               {pendingCount}
             </Badge>
@@ -69,19 +69,19 @@ export const DashboardCard = ({
 
         {/* Content */}
         <div>
-          <h3 className="text-2xl font-bold mb-2 text-foreground group-hover:text-primary transition-colors">
+          <h3 className="text-3xl font-bold mb-3 text-foreground group-hover:text-primary transition-colors leading-tight">
             {title}
           </h3>
-          <p className="text-base text-muted-foreground leading-relaxed">
+          <p className="text-lg text-muted-foreground leading-relaxed">
             {description}
           </p>
         </div>
 
         {/* Bottom indicator */}
-        <div className="mt-6 flex items-center text-sm font-medium text-muted-foreground group-hover:text-primary transition-colors">
+        <div className="mt-8 flex items-center text-base font-semibold text-muted-foreground group-hover:text-primary transition-colors">
           <span>Acessar</span>
           <svg
-            className="w-5 h-5 ml-2 transition-transform duration-300 group-hover:translate-x-1"
+            className="w-6 h-6 ml-3 transition-transform duration-300 group-hover:translate-x-2"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -89,7 +89,7 @@ export const DashboardCard = ({
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
-              strokeWidth={2}
+              strokeWidth={2.5}
               d="M9 5l7 7-7 7"
             />
           </svg>

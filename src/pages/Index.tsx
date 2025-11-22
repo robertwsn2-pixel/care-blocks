@@ -87,49 +87,49 @@ const Index = () => {
 
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Welcome section */}
-        <div className="mb-8">
-          <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-2">
-            Bem-vindo de volta, Maria
+        <div className="mb-10">
+          <h2 className="text-4xl font-bold text-foreground mb-3 leading-tight">
+            Bem-vindo ao AlzheimerCare
           </h2>
-          <p className="text-lg text-muted-foreground">
-            Cuidando de João Silva • Última atualização: há 15 minutos
+          <p className="text-muted-foreground text-xl leading-relaxed">
+            Central de gerenciamento de cuidados para pacientes com Alzheimer
           </p>
         </div>
 
         {/* Status summary */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-          <div className="bg-card rounded-xl border-2 border-border p-6">
-            <div className="flex items-center gap-3">
-              <div className="h-12 w-12 rounded-full bg-success/10 flex items-center justify-center">
-                <span className="text-2xl font-bold text-success">3</span>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
+          <div className="bg-success/10 border-2 border-success/30 rounded-2xl shadow-lg p-8">
+            <div className="flex items-center gap-4">
+              <div className="h-16 w-16 rounded-full bg-success flex items-center justify-center shadow-md">
+                <span className="text-3xl font-bold text-white">12</span>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Tarefas Completas</p>
-                <p className="text-lg font-semibold">Hoje</p>
+                <p className="text-base text-muted-foreground font-medium">Tarefas Completas</p>
+                <p className="text-xl font-semibold text-foreground">Hoje</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-card rounded-xl border-2 border-border p-6">
-            <div className="flex items-center gap-3">
-              <div className="h-12 w-12 rounded-full bg-warning/10 flex items-center justify-center">
-                <span className="text-2xl font-bold text-warning">2</span>
+          <div className="bg-warning/10 border-2 border-warning/30 rounded-2xl shadow-lg p-8">
+            <div className="flex items-center gap-4">
+              <div className="h-16 w-16 rounded-full bg-warning flex items-center justify-center shadow-md">
+                <span className="text-3xl font-bold text-white">5</span>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Pendências</p>
-                <p className="text-lg font-semibold">Próximas horas</p>
+                <p className="text-base text-muted-foreground font-medium">Pendências</p>
+                <p className="text-xl font-semibold text-foreground">Próximas horas</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-card rounded-xl border-2 border-border p-6">
-            <div className="flex items-center gap-3">
-              <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-                <span className="text-2xl font-bold text-primary">5</span>
+          <div className="bg-primary/10 border-2 border-primary/30 rounded-2xl shadow-lg p-8">
+            <div className="flex items-center gap-4">
+              <div className="h-16 w-16 rounded-full bg-primary flex items-center justify-center shadow-md">
+                <span className="text-3xl font-bold text-white">8</span>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Mensagens</p>
-                <p className="text-lg font-semibold">Não lidas</p>
+                <p className="text-base text-muted-foreground font-medium">Mensagens</p>
+                <p className="text-xl font-semibold text-foreground">Não lidas</p>
               </div>
             </div>
           </div>
