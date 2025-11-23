@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { DashboardCard } from "@/components/DashboardCard";
 import {
@@ -12,6 +13,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 
 const Index = () => {
+  const navigate = useNavigate();
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -29,7 +31,7 @@ const Index = () => {
       icon: Pill,
       pendingCount: 2,
       status: "warning" as const,
-      onClick: () => handleCardClick("Medicação"),
+      onClick: () => navigate("/medicacao"),
     },
     {
       title: "Rotina & Calendário",
