@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/Header";
 import { DashboardCard } from "@/components/DashboardCard";
 import {
@@ -14,6 +15,27 @@ import { useToast } from "@/hooks/use-toast";
 
 const Index = () => {
   const navigate = useNavigate();
+  const [user, setUser] = useState<any>(null);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session) {
+        navigate("/auth");
+      } else {
+        setUser(session.user);
+      }
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!session) {
+        navigate("/auth");
+      } else {
+        setUser(session.user);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [navigate]);
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -39,7 +61,7 @@ const Index = () => {
       icon: Calendar,
       pendingCount: 0,
       status: "success" as const,
-      onClick: () => handleCardClick("Rotina & Calendário"),
+      onClick: () => navigate("/rotina"),
     },
     {
       title: "Comunicação",
@@ -47,7 +69,7 @@ const Index = () => {
       icon: MessageCircle,
       pendingCount: 5,
       status: "urgent" as const,
-      onClick: () => handleCardClick("Comunicação"),
+      onClick: () => navigate("/comunicacao"),
     },
     {
       title: "Estado do Paciente",
@@ -55,7 +77,7 @@ const Index = () => {
       icon: Activity,
       pendingCount: 0,
       status: "default" as const,
-      onClick: () => handleCardClick("Estado do Paciente"),
+      onClick: () => navigate("/estado-paciente"),
     },
     {
       title: "Suporte Emocional",
@@ -63,7 +85,7 @@ const Index = () => {
       icon: Heart,
       pendingCount: 0,
       status: "default" as const,
-      onClick: () => handleCardClick("Suporte Emocional"),
+      onClick: () => navigate("/suporte-emocional"),
     },
     {
       title: "Configurações",
@@ -71,7 +93,7 @@ const Index = () => {
       icon: Settings,
       pendingCount: 0,
       status: "default" as const,
-      onClick: () => handleCardClick("Configurações"),
+      onClick: () => navigate("/configuracoes"),
     },
   ];
 
