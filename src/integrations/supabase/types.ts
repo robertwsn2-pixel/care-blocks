@@ -14,7 +14,177 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      contatos: {
+        Row: {
+          created_at: string
+          favorito: boolean | null
+          id: string
+          nome: string
+          relacao: string | null
+          telefone: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          favorito?: boolean | null
+          id?: string
+          nome: string
+          relacao?: string | null
+          telefone: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          favorito?: boolean | null
+          id?: string
+          nome?: string
+          relacao?: string | null
+          telefone?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      estado_paciente: {
+        Row: {
+          created_at: string
+          data: string
+          humor: string | null
+          id: string
+          nivel_dor: number | null
+          observacoes: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          data?: string
+          humor?: string | null
+          id?: string
+          nivel_dor?: number | null
+          observacoes?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          data?: string
+          humor?: string | null
+          id?: string
+          nivel_dor?: number | null
+          observacoes?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      medicacoes: {
+        Row: {
+          ativo: boolean | null
+          created_at: string
+          dia: string
+          horario: string
+          id: string
+          medicamento: string
+          quantidade: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          ativo?: boolean | null
+          created_at?: string
+          dia: string
+          horario: string
+          id?: string
+          medicamento: string
+          quantidade: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          ativo?: boolean | null
+          created_at?: string
+          dia?: string
+          horario?: string
+          id?: string
+          medicamento?: string
+          quantidade?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      rotina_eventos: {
+        Row: {
+          concluido: boolean | null
+          created_at: string
+          data: string
+          descricao: string | null
+          horario: string | null
+          id: string
+          tipo: string
+          titulo: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          concluido?: boolean | null
+          created_at?: string
+          data: string
+          descricao?: string | null
+          horario?: string | null
+          id?: string
+          tipo?: string
+          titulo: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          concluido?: boolean | null
+          created_at?: string
+          data?: string
+          descricao?: string | null
+          horario?: string | null
+          id?: string
+          tipo?: string
+          titulo?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      suporte_emocional: {
+        Row: {
+          conteudo: string
+          created_at: string
+          data: string
+          id: string
+          tipo: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          conteudo: string
+          created_at?: string
+          data?: string
+          id?: string
+          tipo?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          conteudo?: string
+          created_at?: string
+          data?: string
+          id?: string
+          tipo?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

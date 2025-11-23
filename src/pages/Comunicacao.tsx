@@ -6,29 +6,29 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Plus, Trash2, Pill } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, Phone, Star } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { Checkbox } from "@/components/ui/checkbox";
 
-interface Medicacao {
+interface Contato {
   id: string;
-  medicamento: string;
-  quantidade: string;
-  horario: string;
-  dia: string;
-  ativo: boolean;
+  nome: string;
+  telefone: string;
+  relacao: string;
+  favorito: boolean;
 }
 
-const Medicacao = () => {
+const Comunicacao = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [user, setUser] = useState<any>(null);
-  const [medicacoes, setMedicacoes] = useState<Medicacao[]>([]);
+  const [contatos, setContatos] = useState<Contato[]>([]);
   const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({
-    medicamento: "",
-    quantidade: "",
-    horario: "",
-    dia: "",
+    nome: "",
+    telefone: "",
+    relacao: "",
+    favorito: false,
   });
 
   useEffect(() => {
@@ -37,7 +37,7 @@ const Medicacao = () => {
         navigate("/auth");
       } else {
         setUser(session.user);
-        loadMedicacoes(session.user.id);
+        loadContatos(session.user.id);
       }
     });
 
@@ -46,31 +46,30 @@ const Medicacao = () => {
         navigate("/auth");
       } else {
         setUser(session.user);
-        loadMedicacoes(session.user.id);
+        loadContatos(session.user.id);
       }
     });
 
     return () => subscription.unsubscribe();
   }, [navigate]);
 
-  const loadMedicacoes = async (userId: string) => {
+  const loadContatos = async (userId: string) => {
     setLoading(true);
     const { data, error } = await supabase
-      .from("medicacoes")
+      .from("contatos")
       .select("*")
       .eq("user_id", userId)
-      .eq("ativo", true)
-      .order("dia", { ascending: true })
-      .order("horario", { ascending: true });
+      .order("favorito", { ascending: false })
+      .order("nome", { ascending: true });
 
     if (error) {
       toast({
-        title: "Erro ao carregar medicações",
+        title: "Erro ao carregar contatos",
         description: error.message,
         variant: "destructive",
       });
     } else {
-      setMedicacoes(data || []);
+      setContatos(data || []);
     }
     setLoading(false);
   };
@@ -78,10 +77,10 @@ const Medicacao = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.medicamento || !formData.quantidade || !formData.horario || !formData.dia) {
+    if (!formData.nome || !formData.telefone) {
       toast({
         title: "Campos obrigatórios",
-        description: "Por favor, preencha todos os campos.",
+        description: "Por favor, preencha nome e telefone.",
         variant: "destructive",
       });
       return;
@@ -89,12 +88,9 @@ const Medicacao = () => {
 
     if (!user) return;
 
-    const { error } = await supabase.from("medicacoes").insert({
+    const { error } = await supabase.from("contatos").insert({
       user_id: user.id,
-      medicamento: formData.medicamento,
-      quantidade: formData.quantidade,
-      horario: formData.horario,
-      dia: formData.dia,
+      ...formData,
     });
 
     if (error) {
@@ -105,18 +101,18 @@ const Medicacao = () => {
       });
     } else {
       toast({
-        title: "Medicação cadastrada",
-        description: `${formData.medicamento} adicionado com sucesso!`,
+        title: "Contato cadastrado",
+        description: `${formData.nome} adicionado com sucesso!`,
       });
 
       setFormData({
-        medicamento: "",
-        quantidade: "",
-        horario: "",
-        dia: "",
+        nome: "",
+        telefone: "",
+        relacao: "",
+        favorito: false,
       });
 
-      loadMedicacoes(user.id);
+      loadContatos(user.id);
     }
   };
 
@@ -124,8 +120,8 @@ const Medicacao = () => {
     if (!user) return;
 
     const { error } = await supabase
-      .from("medicacoes")
-      .update({ ativo: false })
+      .from("contatos")
+      .delete()
       .eq("id", id);
 
     if (error) {
@@ -136,11 +132,15 @@ const Medicacao = () => {
       });
     } else {
       toast({
-        title: "Medicação removida",
-        description: "Medicação removida com sucesso!",
+        title: "Contato removido",
+        description: "Contato removido com sucesso!",
       });
-      loadMedicacoes(user.id);
+      loadContatos(user.id);
     }
+  };
+
+  const handleCall = (telefone: string) => {
+    window.location.href = `tel:${telefone}`;
   };
 
   return (
@@ -148,7 +148,6 @@ const Medicacao = () => {
       <Header />
       
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header com botão voltar */}
         <div className="mb-8 flex items-center gap-4">
           <Button
             variant="outline"
@@ -162,101 +161,81 @@ const Medicacao = () => {
           
           <div>
             <h2 className="text-4xl font-bold text-foreground leading-tight">
-              Gerenciar Medicação
+              Comunicação
             </h2>
             <p className="text-muted-foreground text-xl mt-2">
-              Cadastre os medicamentos e horários
+              Contatos de emergência e importantes
             </p>
           </div>
         </div>
 
-        {/* Formulário de cadastro */}
-        <Card className="max-w-3xl mx-auto border-3 shadow-xl">
+        <Card className="max-w-3xl mx-auto border-3 shadow-xl mb-8">
           <CardHeader>
             <CardTitle className="text-3xl flex items-center gap-3">
               <Plus className="h-8 w-8 text-primary" />
-              Adicionar Medicamento
+              Adicionar Contato
             </CardTitle>
             <CardDescription className="text-lg">
-              Preencha os dados do medicamento
+              Preencha os dados do contato
             </CardDescription>
           </CardHeader>
           
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-8">
-              {/* Campo Medicamento */}
+            <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-3">
-                <Label htmlFor="medicamento" className="text-lg font-semibold">
-                  Nome do Medicamento *
+                <Label htmlFor="nome" className="text-lg font-semibold">
+                  Nome *
                 </Label>
                 <Input
-                  id="medicamento"
-                  placeholder="Ex: Donepezila"
-                  value={formData.medicamento}
-                  onChange={(e) =>
-                    setFormData({ ...formData, medicamento: e.target.value })
-                  }
+                  id="nome"
+                  placeholder="Ex: Dr. João Silva"
+                  value={formData.nome}
+                  onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
                   className="h-14 text-lg"
                 />
               </div>
 
-              {/* Campo Quantidade */}
               <div className="space-y-3">
-                <Label htmlFor="quantidade" className="text-lg font-semibold">
-                  Quantidade/Dosagem *
+                <Label htmlFor="telefone" className="text-lg font-semibold">
+                  Telefone *
                 </Label>
                 <Input
-                  id="quantidade"
-                  placeholder="Ex: 10mg ou 2 comprimidos"
-                  value={formData.quantidade}
-                  onChange={(e) =>
-                    setFormData({ ...formData, quantidade: e.target.value })
-                  }
+                  id="telefone"
+                  placeholder="Ex: (11) 99999-9999"
+                  value={formData.telefone}
+                  onChange={(e) => setFormData({ ...formData, telefone: e.target.value })}
                   className="h-14 text-lg"
                 />
               </div>
 
-              {/* Campo Horário */}
               <div className="space-y-3">
-                <Label htmlFor="horario" className="text-lg font-semibold">
-                  Horário *
+                <Label htmlFor="relacao" className="text-lg font-semibold">
+                  Relação
                 </Label>
                 <Input
-                  id="horario"
-                  type="time"
-                  value={formData.horario}
-                  onChange={(e) =>
-                    setFormData({ ...formData, horario: e.target.value })
-                  }
+                  id="relacao"
+                  placeholder="Ex: Médico, Familiar, Emergência"
+                  value={formData.relacao}
+                  onChange={(e) => setFormData({ ...formData, relacao: e.target.value })}
                   className="h-14 text-lg"
                 />
               </div>
 
-              {/* Campo Dia */}
-              <div className="space-y-3">
-                <Label htmlFor="dia" className="text-lg font-semibold">
-                  Dia *
-                </Label>
-                <Input
-                  id="dia"
-                  type="date"
-                  value={formData.dia}
-                  onChange={(e) =>
-                    setFormData({ ...formData, dia: e.target.value })
-                  }
-                  className="h-14 text-lg"
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="favorito"
+                  checked={formData.favorito}
+                  onCheckedChange={(checked) => setFormData({ ...formData, favorito: checked as boolean })}
                 />
+                <Label htmlFor="favorito" className="text-lg cursor-pointer">
+                  Marcar como favorito
+                </Label>
               </div>
 
-              {/* Botões de ação */}
               <div className="flex gap-4 pt-4">
-                <Button
-                  type="submit"
-                  size="lg"
-                  className="flex-1 text-lg"
-                >
+                <Button type="submit" size="lg" className="flex-1 text-lg">
                   <Plus className="h-5 w-5 mr-2" />
-                  Cadastrar Medicamento
+                  Cadastrar Contato
                 </Button>
                 
                 <Button
@@ -273,39 +252,46 @@ const Medicacao = () => {
           </CardContent>
         </Card>
 
-        {/* Lista de medicações */}
         {loading ? (
           <div className="text-center text-muted-foreground text-xl mt-8">Carregando...</div>
-        ) : medicacoes.length > 0 ? (
-          <div className="mt-8 max-w-3xl mx-auto">
-            <h3 className="text-2xl font-bold mb-6 text-foreground">Medicações Cadastradas</h3>
+        ) : contatos.length > 0 ? (
+          <div className="max-w-3xl mx-auto">
+            <h3 className="text-2xl font-bold mb-6 text-foreground">Contatos Cadastrados</h3>
             <div className="grid gap-4">
-              {medicacoes.map((med) => (
-                <Card key={med.id} className="border-2">
+              {contatos.map((contato) => (
+                <Card key={contato.id} className="border-2">
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between">
                       <div className="flex items-start gap-4 flex-1">
-                        <Pill className="h-8 w-8 text-primary mt-1" />
+                        {contato.favorito && <Star className="h-6 w-6 text-yellow-500 fill-yellow-500 mt-1" />}
                         <div className="flex-1">
-                          <h4 className="text-xl font-semibold text-foreground">{med.medicamento}</h4>
+                          <h4 className="text-xl font-semibold text-foreground">{contato.nome}</h4>
                           <p className="text-muted-foreground text-lg mt-1">
-                            <strong>Quantidade:</strong> {med.quantidade}
+                            <strong>Telefone:</strong> {contato.telefone}
                           </p>
-                          <p className="text-muted-foreground text-lg">
-                            <strong>Horário:</strong> {med.horario}
-                          </p>
-                          <p className="text-muted-foreground text-lg">
-                            <strong>Dia:</strong> {new Date(med.dia + 'T00:00:00').toLocaleDateString('pt-BR')}
-                          </p>
+                          {contato.relacao && (
+                            <p className="text-muted-foreground text-lg">
+                              <strong>Relação:</strong> {contato.relacao}
+                            </p>
+                          )}
                         </div>
                       </div>
-                      <Button
-                        variant="destructive"
-                        size="icon"
-                        onClick={() => handleDelete(med.id)}
-                      >
-                        <Trash2 className="h-5 w-5" />
-                      </Button>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="default"
+                          size="icon"
+                          onClick={() => handleCall(contato.telefone)}
+                        >
+                          <Phone className="h-5 w-5" />
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          size="icon"
+                          onClick={() => handleDelete(contato.id)}
+                        >
+                          <Trash2 className="h-5 w-5" />
+                        </Button>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
@@ -314,7 +300,7 @@ const Medicacao = () => {
           </div>
         ) : (
           <div className="text-center text-muted-foreground text-xl mt-8">
-            Nenhuma medicação cadastrada ainda.
+            Nenhum contato cadastrado ainda.
           </div>
         )}
       </main>
@@ -322,4 +308,4 @@ const Medicacao = () => {
   );
 };
 
-export default Medicacao;
+export default Comunicacao;
