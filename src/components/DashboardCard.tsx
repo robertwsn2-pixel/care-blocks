@@ -41,7 +41,7 @@ export const DashboardCard = ({
       {/* Icon background with status color */}
       <div
         className={cn(
-          "absolute top-0 right-0 w-40 h-40 -mr-10 -mt-10 rounded-full opacity-15 transition-opacity duration-300 group-hover:opacity-25",
+          "absolute top-0 right-0 w-40 h-40 -mr-10 -mt-10 rounded-full opacity-15 transition-opacity duration-300 group-hover:opacity-25 pointer-events-none",
           statusColors[status]
         )}
       />
