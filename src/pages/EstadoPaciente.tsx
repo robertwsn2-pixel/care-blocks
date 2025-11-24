@@ -8,8 +8,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
-import { ArrowLeft, Plus, Activity } from "lucide-react";
+import { ArrowLeft, Plus, Activity, TrendingUp } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 
 interface EstadoPaciente {
   id: string;
@@ -223,6 +225,65 @@ const EstadoPaciente = () => {
             </form>
           </CardContent>
         </Card>
+
+        {!loading && estados.length > 0 && (
+          <Card className="max-w-3xl mx-auto border-3 shadow-xl mb-8">
+            <CardHeader>
+              <CardTitle className="text-3xl flex items-center gap-3">
+                <TrendingUp className="h-8 w-8 text-primary" />
+                Evolução do Nível de Dor
+              </CardTitle>
+              <CardDescription className="text-lg">
+                Acompanhe a progressão diária
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ChartContainer
+                config={{
+                  nivel_dor: {
+                    label: "Nível de Dor",
+                    color: "hsl(var(--primary))",
+                  },
+                }}
+                className="h-[300px] w-full"
+              >
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart
+                    data={estados
+                      .slice(0, 10)
+                      .reverse()
+                      .map((estado) => ({
+                        data: new Date(estado.data + 'T00:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }),
+                        nivel_dor: estado.nivel_dor,
+                      }))}
+                    margin={{ top: 5, right: 10, left: 10, bottom: 5 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                    <XAxis 
+                      dataKey="data" 
+                      className="text-xs"
+                      tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                    />
+                    <YAxis 
+                      domain={[0, 10]}
+                      className="text-xs"
+                      tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                    />
+                    <ChartTooltip content={<ChartTooltipContent />} />
+                    <Line
+                      type="monotone"
+                      dataKey="nivel_dor"
+                      stroke="hsl(var(--primary))"
+                      strokeWidth={3}
+                      dot={{ fill: 'hsl(var(--primary))', r: 4 }}
+                      activeDot={{ r: 6 }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </ChartContainer>
+            </CardContent>
+          </Card>
+        )}
 
         {loading ? (
           <div className="text-center text-muted-foreground text-xl mt-8">Carregando...</div>
