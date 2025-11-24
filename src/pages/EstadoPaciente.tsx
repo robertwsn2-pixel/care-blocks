@@ -55,6 +55,19 @@ const EstadoPaciente = () => {
     return () => subscription.unsubscribe();
   }, [navigate]);
 
+  const mapHumorToNumber = (humor: string): number => {
+    const humorMap: { [key: string]: number } = {
+      muito_feliz: 10,
+      feliz: 8,
+      neutro: 5,
+      triste: 3,
+      muito_triste: 1,
+      irritado: 2,
+      ansioso: 3,
+    };
+    return humorMap[humor] || 5;
+  };
+
   const loadEstados = async (userId: string) => {
     setLoading(true);
     const { data, error } = await supabase
@@ -231,10 +244,10 @@ const EstadoPaciente = () => {
             <CardHeader>
               <CardTitle className="text-3xl flex items-center gap-3">
                 <TrendingUp className="h-8 w-8 text-primary" />
-                Evolução do Nível de Dor
+                Evolução do Paciente
               </CardTitle>
               <CardDescription className="text-lg">
-                Acompanhe a progressão diária
+                Acompanhe a progressão diária de dor e felicidade
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -242,10 +255,14 @@ const EstadoPaciente = () => {
                 config={{
                   nivel_dor: {
                     label: "Nível de Dor",
-                    color: "hsl(var(--primary))",
+                    color: "hsl(0, 70%, 50%)",
+                  },
+                  nivel_felicidade: {
+                    label: "Nível de Felicidade",
+                    color: "hsl(142, 70%, 50%)",
                   },
                 }}
-                className="h-[300px] w-full"
+                className="h-[400px] w-full"
               >
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart
@@ -255,6 +272,7 @@ const EstadoPaciente = () => {
                       .map((estado) => ({
                         data: new Date(estado.data + 'T00:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }),
                         nivel_dor: estado.nivel_dor,
+                        nivel_felicidade: estado.humor ? mapHumorToNumber(estado.humor) : 5,
                       }))}
                     margin={{ top: 5, right: 10, left: 10, bottom: 5 }}
                   >
@@ -273,9 +291,19 @@ const EstadoPaciente = () => {
                     <Line
                       type="monotone"
                       dataKey="nivel_dor"
-                      stroke="hsl(var(--primary))"
+                      name="Dor"
+                      stroke="hsl(0, 70%, 50%)"
                       strokeWidth={3}
-                      dot={{ fill: 'hsl(var(--primary))', r: 4 }}
+                      dot={{ fill: 'hsl(0, 70%, 50%)', r: 4 }}
+                      activeDot={{ r: 6 }}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="nivel_felicidade"
+                      name="Felicidade"
+                      stroke="hsl(142, 70%, 50%)"
+                      strokeWidth={3}
+                      dot={{ fill: 'hsl(142, 70%, 50%)', r: 4 }}
                       activeDot={{ r: 6 }}
                     />
                   </LineChart>
