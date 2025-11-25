@@ -45,57 +45,71 @@ const Index = () => {
   }, [navigate]);
 
   const loadStats = async (userId: string) => {
-    const hoje = new Date().toISOString().split('T')[0];
-    const agora = new Date();
-    const proximasHoras = new Date(agora.getTime() + 3 * 60 * 60 * 1000); // próximas 3 horas
+    try {
+      const hoje = new Date().toISOString().split('T')[0];
+      const agora = new Date();
+      const proximasHoras = new Date(agora.getTime() + 3 * 60 * 60 * 1000);
 
-    // Contar tarefas completas (medicações tomadas + eventos concluídos)
-    const { count: medicacoesTomadas } = await supabase
-      .from("medicacoes")
-      .select("*", { count: 'exact', head: true })
-      .eq("user_id", userId)
-      .eq("dia", hoje)
-      .eq("ativo", false);
+      // Contar tarefas completas
+      try {
+        const { count: medicacoesTomadas } = await supabase
+          .from("medicacoes")
+          .select("*", { count: 'exact', head: true })
+          .eq("user_id", userId)
+          .eq("dia", hoje)
+          .eq("ativo", false);
 
-    const { count: eventosConcluidos } = await supabase
-      .from("rotina_eventos")
-      .select("*", { count: 'exact', head: true })
-      .eq("user_id", userId)
-      .eq("data", hoje)
-      .eq("concluido", true);
+        const { count: eventosConcluidos } = await supabase
+          .from("rotina_eventos")
+          .select("*", { count: 'exact', head: true })
+          .eq("user_id", userId)
+          .eq("data", hoje)
+          .eq("concluido", true);
 
-    const totalCompletas = (medicacoesTomadas || 0) + (eventosConcluidos || 0);
-    setTarefasCompletas(totalCompletas);
+        setTarefasCompletas((medicacoesTomadas || 0) + (eventosConcluidos || 0));
+      } catch (error) {
+        console.error("Erro ao carregar tarefas completas:", error);
+      }
 
-    // Contar pendências (medicações e eventos não concluídos nas próximas horas)
-    const { data: medicacoesPendentes } = await supabase
-      .from("medicacoes")
-      .select("*")
-      .eq("user_id", userId)
-      .eq("dia", hoje)
-      .eq("ativo", true)
-      .lte("horario", proximasHoras.toTimeString().split(' ')[0]);
+      // Contar pendências
+      try {
+        const { data: medicacoesPendentes } = await supabase
+          .from("medicacoes")
+          .select("*")
+          .eq("user_id", userId)
+          .eq("dia", hoje)
+          .eq("ativo", true)
+          .lte("horario", proximasHoras.toTimeString().split(' ')[0]);
 
-    const { data: eventosPendentes } = await supabase
-      .from("rotina_eventos")
-      .select("*")
-      .eq("user_id", userId)
-      .eq("data", hoje)
-      .eq("concluido", false)
-      .lte("horario", proximasHoras.toTimeString().split(' ')[0]);
+        const { data: eventosPendentes } = await supabase
+          .from("rotina_eventos")
+          .select("*")
+          .eq("user_id", userId)
+          .eq("data", hoje)
+          .eq("concluido", false)
+          .lte("horario", proximasHoras.toTimeString().split(' ')[0]);
 
-    const totalPendencias = (medicacoesPendentes?.length || 0) + (eventosPendentes?.length || 0);
-    setPendencias(totalPendencias);
+        setPendencias((medicacoesPendentes?.length || 0) + (eventosPendentes?.length || 0));
+      } catch (error) {
+        console.error("Erro ao carregar pendências:", error);
+      }
 
-    // Contar mensagens não lidas
-    const { count: mensagensCount } = await supabase
-      .from("mensagens")
-      .select("*", { count: 'exact', head: true })
-      .eq("user_id", userId)
-      .eq("lida", false)
-      .eq("enviado_por", "contato");
+      // Contar mensagens não lidas
+      try {
+        const { count: mensagensCount } = await supabase
+          .from("mensagens")
+          .select("*", { count: 'exact', head: true })
+          .eq("user_id", userId)
+          .eq("lida", false)
+          .eq("enviado_por", "contato");
 
-    setMensagensNaoLidas(mensagensCount || 0);
+        setMensagensNaoLidas(mensagensCount || 0);
+      } catch (error) {
+        console.error("Erro ao carregar mensagens:", error);
+      }
+    } catch (error) {
+      console.error("Erro geral ao carregar estatísticas:", error);
+    }
   };
 
   const handleCardClick = (title: string) => {
