@@ -21,6 +21,8 @@ const Index = () => {
   const [tarefasCompletas, setTarefasCompletas] = useState(0);
   const [pendencias, setPendencias] = useState(0);
   const [mensagensNaoLidas, setMensagensNaoLidas] = useState(0);
+  const [medicacoesPendentes, setMedicacoesPendentes] = useState(0);
+  const [eventosPendentes, setEventosPendentes] = useState(0);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -113,7 +115,7 @@ const Index = () => {
 
       // Contar TODAS as pendências de hoje (não apenas próximas 3 horas)
       try {
-        const { count: medicacoesPendentes, error: medPendError } = await supabase
+        const { count: medicacoesPendentesCount, error: medPendError } = await supabase
           .from("medicacoes")
           .select("*", { count: 'exact', head: true })
           .eq("user_id", userId)
@@ -122,7 +124,7 @@ const Index = () => {
 
         if (medPendError) console.error("Erro medicações pendentes:", medPendError);
 
-        const { count: eventosPendentes, error: eventPendError } = await supabase
+        const { count: eventosPendentesCount, error: eventPendError } = await supabase
           .from("rotina_eventos")
           .select("*", { count: 'exact', head: true })
           .eq("user_id", userId)
@@ -131,8 +133,14 @@ const Index = () => {
 
         if (eventPendError) console.error("Erro eventos pendentes:", eventPendError);
 
-        const totalPendencias = (medicacoesPendentes || 0) + (eventosPendentes || 0);
-        console.log("Pendências:", { medicacoesPendentes, eventosPendentes, totalPendencias });
+        const medPendentes = medicacoesPendentesCount || 0;
+        const evtPendentes = eventosPendentesCount || 0;
+        const totalPendencias = medPendentes + evtPendentes;
+
+        console.log("Pendências:", { medicacoesPendentes: medPendentes, eventosPendentes: evtPendentes, totalPendencias });
+
+        setMedicacoesPendentes(medPendentes);
+        setEventosPendentes(evtPendentes);
         setPendencias(totalPendencias);
       } catch (error) {
         console.error("Erro ao carregar pendências:", error);
@@ -171,24 +179,24 @@ const Index = () => {
       title: "Medicação",
       description: "Gerencie horários, alertas e histórico de medicamentos",
       icon: Pill,
-      pendingCount: 2,
-      status: "warning" as const,
+      pendingCount: medicacoesPendentes,
+      status: (medicacoesPendentes > 0 ? "warning" : "success") as const,
       onClick: () => navigate("/medicacao"),
     },
     {
       title: "Rotina & Calendário",
       description: "Organize atividades diárias e compromissos",
       icon: Calendar,
-      pendingCount: 0,
-      status: "success" as const,
+      pendingCount: eventosPendentes,
+      status: (eventosPendentes > 0 ? "warning" : "success") as const,
       onClick: () => navigate("/rotina"),
     },
     {
       title: "Comunicação",
       description: "Chat entre cuidadores e atualizações importantes",
       icon: MessageCircle,
-      pendingCount: 5,
-      status: "urgent" as const,
+      pendingCount: mensagensNaoLidas,
+      status: (mensagensNaoLidas > 0 ? "urgent" : "success") as const,
       onClick: () => navigate("/comunicacao"),
     },
     {
