@@ -44,65 +44,112 @@ const Index = () => {
     return () => subscription.unsubscribe();
   }, [navigate]);
 
+  // Realtime updates para recarregar stats automaticamente
+  useEffect(() => {
+    if (!user) return;
+
+    const medicacoesChannel = supabase
+      .channel('medicacoes-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'medicacoes' }, () => {
+        loadStats(user.id);
+      })
+      .subscribe();
+
+    const rotinaChannel = supabase
+      .channel('rotina-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'rotina_eventos' }, () => {
+        loadStats(user.id);
+      })
+      .subscribe();
+
+    const mensagensChannel = supabase
+      .channel('mensagens-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'mensagens' }, () => {
+        loadStats(user.id);
+      })
+      .subscribe();
+
+    return () => {
+      medicacoesChannel.unsubscribe();
+      rotinaChannel.unsubscribe();
+      mensagensChannel.unsubscribe();
+    };
+  }, [user]);
+
   const loadStats = async (userId: string) => {
     try {
       const hoje = new Date().toISOString().split('T')[0];
       const agora = new Date();
-      const proximasHoras = new Date(agora.getTime() + 3 * 60 * 60 * 1000);
+      const horaAtual = agora.toTimeString().split(' ')[0].substring(0, 8);
 
-      // Contar tarefas completas
+      console.log("Carregando stats para:", { userId, hoje, horaAtual });
+
+      // Contar tarefas completas (medicações tomadas + eventos concluídos HOJE)
       try {
-        const { count: medicacoesTomadas } = await supabase
+        const { count: medicacoesTomadas, error: medError } = await supabase
           .from("medicacoes")
           .select("*", { count: 'exact', head: true })
           .eq("user_id", userId)
           .eq("dia", hoje)
           .eq("ativo", false);
 
-        const { count: eventosConcluidos } = await supabase
+        if (medError) console.error("Erro medicações tomadas:", medError);
+
+        const { count: eventosConcluidos, error: eventError } = await supabase
           .from("rotina_eventos")
           .select("*", { count: 'exact', head: true })
           .eq("user_id", userId)
           .eq("data", hoje)
           .eq("concluido", true);
 
-        setTarefasCompletas((medicacoesTomadas || 0) + (eventosConcluidos || 0));
+        if (eventError) console.error("Erro eventos concluídos:", eventError);
+
+        const totalCompletas = (medicacoesTomadas || 0) + (eventosConcluidos || 0);
+        console.log("Tarefas completas:", { medicacoesTomadas, eventosConcluidos, totalCompletas });
+        setTarefasCompletas(totalCompletas);
       } catch (error) {
         console.error("Erro ao carregar tarefas completas:", error);
       }
 
-      // Contar pendências
+      // Contar TODAS as pendências de hoje (não apenas próximas 3 horas)
       try {
-        const { data: medicacoesPendentes } = await supabase
+        const { count: medicacoesPendentes, error: medPendError } = await supabase
           .from("medicacoes")
-          .select("*")
+          .select("*", { count: 'exact', head: true })
           .eq("user_id", userId)
           .eq("dia", hoje)
-          .eq("ativo", true)
-          .lte("horario", proximasHoras.toTimeString().split(' ')[0]);
+          .eq("ativo", true);
 
-        const { data: eventosPendentes } = await supabase
+        if (medPendError) console.error("Erro medicações pendentes:", medPendError);
+
+        const { count: eventosPendentes, error: eventPendError } = await supabase
           .from("rotina_eventos")
-          .select("*")
+          .select("*", { count: 'exact', head: true })
           .eq("user_id", userId)
           .eq("data", hoje)
-          .eq("concluido", false)
-          .lte("horario", proximasHoras.toTimeString().split(' ')[0]);
+          .eq("concluido", false);
 
-        setPendencias((medicacoesPendentes?.length || 0) + (eventosPendentes?.length || 0));
+        if (eventPendError) console.error("Erro eventos pendentes:", eventPendError);
+
+        const totalPendencias = (medicacoesPendentes || 0) + (eventosPendentes || 0);
+        console.log("Pendências:", { medicacoesPendentes, eventosPendentes, totalPendencias });
+        setPendencias(totalPendencias);
       } catch (error) {
         console.error("Erro ao carregar pendências:", error);
       }
 
       // Contar mensagens não lidas
       try {
-        const { count: mensagensCount } = await supabase
+        const { count: mensagensCount, error: msgError } = await supabase
           .from("mensagens")
           .select("*", { count: 'exact', head: true })
           .eq("user_id", userId)
           .eq("lida", false)
           .eq("enviado_por", "contato");
 
+        if (msgError) console.error("Erro mensagens:", msgError);
+
+        console.log("Mensagens não lidas:", mensagensCount);
         setMensagensNaoLidas(mensagensCount || 0);
       } catch (error) {
         console.error("Erro ao carregar mensagens:", error);
@@ -214,7 +261,7 @@ const Index = () => {
               </div>
               <div>
                 <p className="text-base text-muted-foreground font-medium">Pendências</p>
-                <p className="text-xl font-semibold text-foreground">Próximas 3 horas</p>
+                <p className="text-xl font-semibold text-foreground">Hoje</p>
               </div>
             </div>
           </div>
