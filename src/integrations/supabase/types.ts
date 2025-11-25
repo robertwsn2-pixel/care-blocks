@@ -116,6 +116,47 @@ export type Database = {
         }
         Relationships: []
       }
+      mensagens: {
+        Row: {
+          contato_id: string
+          created_at: string
+          enviado_por: string
+          id: string
+          lida: boolean | null
+          mensagem: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          contato_id: string
+          created_at?: string
+          enviado_por: string
+          id?: string
+          lida?: boolean | null
+          mensagem: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          contato_id?: string
+          created_at?: string
+          enviado_por?: string
+          id?: string
+          lida?: boolean | null
+          mensagem?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mensagens_contato_id_fkey"
+            columns: ["contato_id"]
+            isOneToOne: false
+            referencedRelation: "contatos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       rotina_eventos: {
         Row: {
           concluido: boolean | null
