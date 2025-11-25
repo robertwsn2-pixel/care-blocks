@@ -16,6 +16,11 @@ import { useToast } from "@/hooks/use-toast";
 const Index = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState<any>(null);
+  const { toast } = useToast();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [tarefasCompletas, setTarefasCompletas] = useState(0);
+  const [pendencias, setPendencias] = useState(0);
+  const [mensagensNaoLidas, setMensagensNaoLidas] = useState(0);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -23,6 +28,7 @@ const Index = () => {
         navigate("/auth");
       } else {
         setUser(session.user);
+        loadStats(session.user.id);
       }
     });
 
@@ -31,13 +37,66 @@ const Index = () => {
         navigate("/auth");
       } else {
         setUser(session.user);
+        loadStats(session.user.id);
       }
     });
 
     return () => subscription.unsubscribe();
   }, [navigate]);
-  const { toast } = useToast();
-  const [searchQuery, setSearchQuery] = useState("");
+
+  const loadStats = async (userId: string) => {
+    const hoje = new Date().toISOString().split('T')[0];
+    const agora = new Date();
+    const proximasHoras = new Date(agora.getTime() + 3 * 60 * 60 * 1000); // próximas 3 horas
+
+    // Contar tarefas completas (medicações tomadas + eventos concluídos)
+    const { count: medicacoesTomadas } = await supabase
+      .from("medicacoes")
+      .select("*", { count: 'exact', head: true })
+      .eq("user_id", userId)
+      .eq("dia", hoje)
+      .eq("ativo", false);
+
+    const { count: eventosConcluidos } = await supabase
+      .from("rotina_eventos")
+      .select("*", { count: 'exact', head: true })
+      .eq("user_id", userId)
+      .eq("data", hoje)
+      .eq("concluido", true);
+
+    const totalCompletas = (medicacoesTomadas || 0) + (eventosConcluidos || 0);
+    setTarefasCompletas(totalCompletas);
+
+    // Contar pendências (medicações e eventos não concluídos nas próximas horas)
+    const { data: medicacoesPendentes } = await supabase
+      .from("medicacoes")
+      .select("*")
+      .eq("user_id", userId)
+      .eq("dia", hoje)
+      .eq("ativo", true)
+      .lte("horario", proximasHoras.toTimeString().split(' ')[0]);
+
+    const { data: eventosPendentes } = await supabase
+      .from("rotina_eventos")
+      .select("*")
+      .eq("user_id", userId)
+      .eq("data", hoje)
+      .eq("concluido", false)
+      .lte("horario", proximasHoras.toTimeString().split(' ')[0]);
+
+    const totalPendencias = (medicacoesPendentes?.length || 0) + (eventosPendentes?.length || 0);
+    setPendencias(totalPendencias);
+
+    // Contar mensagens não lidas
+    const { count: mensagensCount } = await supabase
+      .from("mensagens")
+      .select("*", { count: 'exact', head: true })
+      .eq("user_id", userId)
+      .eq("lida", false)
+      .eq("enviado_por", "contato");
+
+    setMensagensNaoLidas(mensagensCount || 0);
+  };
 
   const handleCardClick = (title: string) => {
     toast({
@@ -125,7 +184,7 @@ const Index = () => {
           <div className="bg-success/10 border-2 border-success/30 rounded-2xl shadow-lg p-8">
             <div className="flex items-center gap-4">
               <div className="h-16 w-16 rounded-full bg-success flex items-center justify-center shadow-md">
-                <span className="text-3xl font-bold text-white">12</span>
+                <span className="text-3xl font-bold text-white">{tarefasCompletas}</span>
               </div>
               <div>
                 <p className="text-base text-muted-foreground font-medium">Tarefas Completas</p>
@@ -137,11 +196,11 @@ const Index = () => {
           <div className="bg-warning/10 border-2 border-warning/30 rounded-2xl shadow-lg p-8">
             <div className="flex items-center gap-4">
               <div className="h-16 w-16 rounded-full bg-warning flex items-center justify-center shadow-md">
-                <span className="text-3xl font-bold text-white">5</span>
+                <span className="text-3xl font-bold text-white">{pendencias}</span>
               </div>
               <div>
                 <p className="text-base text-muted-foreground font-medium">Pendências</p>
-                <p className="text-xl font-semibold text-foreground">Próximas horas</p>
+                <p className="text-xl font-semibold text-foreground">Próximas 3 horas</p>
               </div>
             </div>
           </div>
@@ -149,7 +208,7 @@ const Index = () => {
           <div className="bg-primary/10 border-2 border-primary/30 rounded-2xl shadow-lg p-8">
             <div className="flex items-center gap-4">
               <div className="h-16 w-16 rounded-full bg-primary flex items-center justify-center shadow-md">
-                <span className="text-3xl font-bold text-white">8</span>
+                <span className="text-3xl font-bold text-white">{mensagensNaoLidas}</span>
               </div>
               <div>
                 <p className="text-base text-muted-foreground font-medium">Mensagens</p>
