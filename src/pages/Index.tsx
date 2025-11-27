@@ -23,16 +23,27 @@ const Index = () => {
   const [mensagensNaoLidas, setMensagensNaoLidas] = useState(0);
   const [medicacoesPendentes, setMedicacoesPendentes] = useState(0);
   const [eventosPendentes, setEventosPendentes] = useState(0);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session) {
+    const checkAuth = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+          navigate("/auth");
+        } else {
+          setUser(session.user);
+          await loadStats(session.user.id);
+        }
+      } catch (error) {
+        console.error("Erro ao verificar autenticação:", error);
         navigate("/auth");
-      } else {
-        setUser(session.user);
-        loadStats(session.user.id);
+      } finally {
+        setLoading(false);
       }
-    });
+    };
+
+    checkAuth();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (!session) {
@@ -180,7 +191,7 @@ const Index = () => {
       description: "Gerencie horários, alertas e histórico de medicamentos",
       icon: Pill,
       pendingCount: medicacoesPendentes,
-      status: (medicacoesPendentes > 0 ? "warning" : "success") as const,
+      status: medicacoesPendentes > 0 ? ("warning" as const) : ("success" as const),
       onClick: () => navigate("/medicacao"),
     },
     {
@@ -188,7 +199,7 @@ const Index = () => {
       description: "Organize atividades diárias e compromissos",
       icon: Calendar,
       pendingCount: eventosPendentes,
-      status: (eventosPendentes > 0 ? "warning" : "success") as const,
+      status: eventosPendentes > 0 ? ("warning" as const) : ("success" as const),
       onClick: () => navigate("/rotina"),
     },
     {
@@ -196,7 +207,7 @@ const Index = () => {
       description: "Chat entre cuidadores e atualizações importantes",
       icon: MessageCircle,
       pendingCount: mensagensNaoLidas,
-      status: (mensagensNaoLidas > 0 ? "urgent" : "success") as const,
+      status: mensagensNaoLidas > 0 ? ("urgent" as const) : ("success" as const),
       onClick: () => navigate("/comunicacao"),
     },
     {
@@ -232,6 +243,17 @@ const Index = () => {
           card.description.toLowerCase().includes(searchQuery.toLowerCase())
       )
     : dashboardCards;
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Carregando...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
