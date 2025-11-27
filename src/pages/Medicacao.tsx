@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Plus, Trash2, Pill } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
+import { ArrowLeft, Plus, Trash2, Pill, Calendar as CalendarIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface Medicacao {
@@ -24,6 +25,7 @@ const Medicacao = () => {
   const [user, setUser] = useState<any>(null);
   const [medicacoes, setMedicacoes] = useState<Medicacao[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [formData, setFormData] = useState({
     medicamento: "",
     quantidade: "",
@@ -170,114 +172,134 @@ const Medicacao = () => {
           </div>
         </div>
 
-        {/* Formulário de cadastro */}
-        <Card className="max-w-3xl mx-auto border-3 shadow-xl">
-          <CardHeader>
-            <CardTitle className="text-3xl flex items-center gap-3">
-              <Plus className="h-8 w-8 text-primary" />
-              Adicionar Medicamento
-            </CardTitle>
-            <CardDescription className="text-lg">
-              Preencha os dados do medicamento
-            </CardDescription>
-          </CardHeader>
-          
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-8">
-              {/* Campo Medicamento */}
-              <div className="space-y-3">
-                <Label htmlFor="medicamento" className="text-lg font-semibold">
-                  Nome do Medicamento *
-                </Label>
-                <Input
-                  id="medicamento"
-                  placeholder="Ex: Donepezila"
-                  value={formData.medicamento}
-                  onChange={(e) =>
-                    setFormData({ ...formData, medicamento: e.target.value })
-                  }
-                  className="h-14 text-lg"
-                />
-              </div>
+        <div className="grid lg:grid-cols-2 gap-8">
+          {/* Formulário de cadastro */}
+          <Card className="border-3 shadow-xl">
+            <CardHeader>
+              <CardTitle className="text-3xl flex items-center gap-3">
+                <Plus className="h-8 w-8 text-primary" />
+                Adicionar Medicamento
+              </CardTitle>
+              <CardDescription className="text-lg">
+                Preencha os dados do medicamento
+              </CardDescription>
+            </CardHeader>
+            
+            <CardContent>
+              <form onSubmit={handleSubmit} className="space-y-8">
+                {/* Campo Medicamento */}
+                <div className="space-y-3">
+                  <Label htmlFor="medicamento" className="text-lg font-semibold">
+                    Nome do Medicamento *
+                  </Label>
+                  <Input
+                    id="medicamento"
+                    placeholder="Ex: Donepezila"
+                    value={formData.medicamento}
+                    onChange={(e) =>
+                      setFormData({ ...formData, medicamento: e.target.value })
+                    }
+                    className="h-14 text-lg"
+                  />
+                </div>
 
-              {/* Campo Quantidade */}
-              <div className="space-y-3">
-                <Label htmlFor="quantidade" className="text-lg font-semibold">
-                  Quantidade/Dosagem *
-                </Label>
-                <Input
-                  id="quantidade"
-                  placeholder="Ex: 10mg ou 2 comprimidos"
-                  value={formData.quantidade}
-                  onChange={(e) =>
-                    setFormData({ ...formData, quantidade: e.target.value })
-                  }
-                  className="h-14 text-lg"
-                />
-              </div>
+                {/* Campo Quantidade */}
+                <div className="space-y-3">
+                  <Label htmlFor="quantidade" className="text-lg font-semibold">
+                    Quantidade/Dosagem *
+                  </Label>
+                  <Input
+                    id="quantidade"
+                    placeholder="Ex: 10mg ou 2 comprimidos"
+                    value={formData.quantidade}
+                    onChange={(e) =>
+                      setFormData({ ...formData, quantidade: e.target.value })
+                    }
+                    className="h-14 text-lg"
+                  />
+                </div>
 
-              {/* Campo Horário */}
-              <div className="space-y-3">
-                <Label htmlFor="horario" className="text-lg font-semibold">
-                  Horário *
-                </Label>
-                <Input
-                  id="horario"
-                  type="time"
-                  value={formData.horario}
-                  onChange={(e) =>
-                    setFormData({ ...formData, horario: e.target.value })
-                  }
-                  className="h-14 text-lg"
-                />
-              </div>
+                {/* Campo Horário */}
+                <div className="space-y-3">
+                  <Label htmlFor="horario" className="text-lg font-semibold">
+                    Horário *
+                  </Label>
+                  <Input
+                    id="horario"
+                    type="time"
+                    value={formData.horario}
+                    onChange={(e) =>
+                      setFormData({ ...formData, horario: e.target.value })
+                    }
+                    className="h-14 text-lg"
+                  />
+                </div>
 
-              {/* Campo Dia */}
-              <div className="space-y-3">
-                <Label htmlFor="dia" className="text-lg font-semibold">
-                  Dia *
-                </Label>
-                <Input
-                  id="dia"
-                  type="date"
-                  value={formData.dia}
-                  onChange={(e) =>
-                    setFormData({ ...formData, dia: e.target.value })
-                  }
-                  className="h-14 text-lg"
-                />
-              </div>
+                {/* Campo Dia */}
+                <div className="space-y-3">
+                  <Label htmlFor="dia" className="text-lg font-semibold">
+                    Dia *
+                  </Label>
+                  <Input
+                    id="dia"
+                    type="date"
+                    value={formData.dia}
+                    onChange={(e) =>
+                      setFormData({ ...formData, dia: e.target.value })
+                    }
+                    className="h-14 text-lg"
+                  />
+                </div>
 
-              {/* Botões de ação */}
-              <div className="flex gap-4 pt-4">
-                <Button
-                  type="submit"
-                  size="lg"
-                  className="flex-1 text-lg"
-                >
-                  <Plus className="h-5 w-5 mr-2" />
-                  Cadastrar Medicamento
-                </Button>
-                
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="lg"
-                  onClick={() => navigate("/")}
-                  className="text-lg"
-                >
-                  Cancelar
-                </Button>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
+                {/* Botões de ação */}
+                <div className="flex gap-4 pt-4">
+                  <Button
+                    type="submit"
+                    size="lg"
+                    className="flex-1 text-lg"
+                  >
+                    <Plus className="h-5 w-5 mr-2" />
+                    Cadastrar Medicamento
+                  </Button>
+                  
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="lg"
+                    onClick={() => navigate("/")}
+                    className="text-lg"
+                  >
+                    Cancelar
+                  </Button>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
+
+          {/* Calendário */}
+          <Card className="border-3 shadow-xl">
+            <CardHeader>
+              <CardTitle className="text-3xl flex items-center gap-3">
+                <CalendarIcon className="h-8 w-8 text-primary" />
+                Calendário
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="flex justify-center">
+              <Calendar
+                mode="single"
+                selected={selectedDate}
+                onSelect={setSelectedDate}
+                className="rounded-md border"
+              />
+            </CardContent>
+          </Card>
+        </div>
 
         {/* Lista de medicações */}
         {loading ? (
           <div className="text-center text-muted-foreground text-xl mt-8">Carregando...</div>
         ) : medicacoes.length > 0 ? (
-          <div className="mt-8 max-w-3xl mx-auto">
+          <div className="mt-8">
             <h3 className="text-2xl font-bold mb-6 text-foreground">Medicações Cadastradas</h3>
             <div className="grid gap-4">
               {medicacoes.map((med) => (
