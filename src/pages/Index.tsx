@@ -21,29 +21,16 @@ const Index = () => {
   const [tarefasCompletas, setTarefasCompletas] = useState(0);
   const [pendencias, setPendencias] = useState(0);
   const [mensagensNaoLidas, setMensagensNaoLidas] = useState(0);
-  const [medicacoesPendentes, setMedicacoesPendentes] = useState(0);
-  const [eventosPendentes, setEventosPendentes] = useState(0);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session) {
-          navigate("/auth");
-        } else {
-          setUser(session.user);
-          await loadStats(session.user.id);
-        }
-      } catch (error) {
-        console.error("Erro ao verificar autenticação:", error);
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session) {
         navigate("/auth");
-      } finally {
-        setLoading(false);
+      } else {
+        setUser(session.user);
+        loadStats(session.user.id);
       }
-    };
-
-    checkAuth();
+    });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (!session) {
@@ -126,7 +113,7 @@ const Index = () => {
 
       // Contar TODAS as pendências de hoje (não apenas próximas 3 horas)
       try {
-        const { count: medicacoesPendentesCount, error: medPendError } = await supabase
+        const { count: medicacoesPendentes, error: medPendError } = await supabase
           .from("medicacoes")
           .select("*", { count: 'exact', head: true })
           .eq("user_id", userId)
@@ -135,7 +122,7 @@ const Index = () => {
 
         if (medPendError) console.error("Erro medicações pendentes:", medPendError);
 
-        const { count: eventosPendentesCount, error: eventPendError } = await supabase
+        const { count: eventosPendentes, error: eventPendError } = await supabase
           .from("rotina_eventos")
           .select("*", { count: 'exact', head: true })
           .eq("user_id", userId)
@@ -144,14 +131,8 @@ const Index = () => {
 
         if (eventPendError) console.error("Erro eventos pendentes:", eventPendError);
 
-        const medPendentes = medicacoesPendentesCount || 0;
-        const evtPendentes = eventosPendentesCount || 0;
-        const totalPendencias = medPendentes + evtPendentes;
-
-        console.log("Pendências:", { medicacoesPendentes: medPendentes, eventosPendentes: evtPendentes, totalPendencias });
-
-        setMedicacoesPendentes(medPendentes);
-        setEventosPendentes(evtPendentes);
+        const totalPendencias = (medicacoesPendentes || 0) + (eventosPendentes || 0);
+        console.log("Pendências:", { medicacoesPendentes, eventosPendentes, totalPendencias });
         setPendencias(totalPendencias);
       } catch (error) {
         console.error("Erro ao carregar pendências:", error);
@@ -190,24 +171,24 @@ const Index = () => {
       title: "Medicação",
       description: "Gerencie horários, alertas e histórico de medicamentos",
       icon: Pill,
-      pendingCount: medicacoesPendentes,
-      status: medicacoesPendentes > 0 ? ("warning" as const) : ("success" as const),
+      pendingCount: 2,
+      status: "warning" as const,
       onClick: () => navigate("/medicacao"),
     },
     {
       title: "Rotina & Calendário",
       description: "Organize atividades diárias e compromissos",
       icon: Calendar,
-      pendingCount: eventosPendentes,
-      status: eventosPendentes > 0 ? ("warning" as const) : ("success" as const),
+      pendingCount: 0,
+      status: "success" as const,
       onClick: () => navigate("/rotina"),
     },
     {
       title: "Comunicação",
       description: "Chat entre cuidadores e atualizações importantes",
       icon: MessageCircle,
-      pendingCount: mensagensNaoLidas,
-      status: mensagensNaoLidas > 0 ? ("urgent" as const) : ("success" as const),
+      pendingCount: 5,
+      status: "urgent" as const,
       onClick: () => navigate("/comunicacao"),
     },
     {
@@ -243,17 +224,6 @@ const Index = () => {
           card.description.toLowerCase().includes(searchQuery.toLowerCase())
       )
     : dashboardCards;
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Carregando...</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-background">
