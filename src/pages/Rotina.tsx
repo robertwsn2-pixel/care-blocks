@@ -10,8 +10,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Calendar } from "@/components/ui/calendar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ArrowLeft, Plus, Trash2, Calendar as CalendarIcon, Clock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { format } from "date-fns";
 
 interface RotinaEvento {
   id: string;
@@ -192,127 +194,10 @@ const Rotina = () => {
           </div>
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-8">
+        <div className="max-w-4xl mx-auto">
           {/* Formulário */}
           <Card className="border-3 shadow-xl">
-            <CardHeader>
-              <CardTitle className="text-3xl flex items-center gap-3">
-                <Plus className="h-8 w-8 text-primary" />
-                Adicionar Evento
-              </CardTitle>
-              <CardDescription className="text-lg">
-                Preencha os dados do evento
-              </CardDescription>
-            </CardHeader>
-            
-            <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="space-y-3">
-                  <Label htmlFor="titulo" className="text-lg font-semibold">
-                    Título *
-                  </Label>
-                  <Input
-                    id="titulo"
-                    placeholder="Ex: Consulta médica"
-                    value={formData.titulo}
-                    onChange={(e) => setFormData({ ...formData, titulo: e.target.value })}
-                    className="h-14 text-lg"
-                  />
-                </div>
-
-                <div className="space-y-3">
-                  <Label htmlFor="tipo" className="text-lg font-semibold">
-                    Tipo
-                  </Label>
-                  <Select value={formData.tipo} onValueChange={(value) => setFormData({ ...formData, tipo: value })}>
-                    <SelectTrigger className="h-14 text-lg">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="afazer">Afazer</SelectItem>
-                      <SelectItem value="rotina">Rotina</SelectItem>
-                      <SelectItem value="consulta">Consulta</SelectItem>
-                      <SelectItem value="exercicio">Exercício</SelectItem>
-                      <SelectItem value="lazer">Lazer</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-3">
-                  <Label htmlFor="descricao" className="text-lg font-semibold">
-                    Descrição
-                  </Label>
-                  <Textarea
-                    id="descricao"
-                    placeholder="Detalhes do evento..."
-                    value={formData.descricao}
-                    onChange={(e) => setFormData({ ...formData, descricao: e.target.value })}
-                    className="text-lg min-h-[100px]"
-                  />
-                </div>
-
-                <div className="space-y-3">
-                  <Label htmlFor="data" className="text-lg font-semibold">
-                    Data *
-                  </Label>
-                  <Input
-                    id="data"
-                    type="date"
-                    value={formData.data}
-                    onChange={(e) => setFormData({ ...formData, data: e.target.value })}
-                    className="h-14 text-lg"
-                  />
-                </div>
-
-                <div className="space-y-3">
-                  <Label htmlFor="horario" className="text-lg font-semibold">
-                    Horário
-                  </Label>
-                  <Input
-                    id="horario"
-                    type="time"
-                    value={formData.horario}
-                    onChange={(e) => setFormData({ ...formData, horario: e.target.value })}
-                    className="h-14 text-lg"
-                  />
-                </div>
-
-                <div className="flex gap-4 pt-4">
-                  <Button type="submit" size="lg" className="flex-1 text-lg">
-                    <Plus className="h-5 w-5 mr-2" />
-                    Cadastrar Evento
-                  </Button>
-                  
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="lg"
-                    onClick={() => navigate("/")}
-                    className="text-lg"
-                  >
-                    Cancelar
-                  </Button>
-                </div>
-              </form>
-            </CardContent>
-          </Card>
-
-          {/* Calendário */}
-          <Card className="border-3 shadow-xl">
-            <CardHeader>
-              <CardTitle className="text-3xl flex items-center gap-3">
-                <CalendarIcon className="h-8 w-8 text-primary" />
-                Calendário
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="flex justify-center">
-              <Calendar
-                mode="single"
-                selected={selectedDate}
-                onSelect={setSelectedDate}
-                className="rounded-md border"
-              />
-            </CardContent>
+...
           </Card>
         </div>
 
