@@ -166,29 +166,35 @@ const Index = () => {
     });
   };
 
+  const getStatus = (count: number): "success" | "warning" | "urgent" | "default" => {
+    if (count === 0) return "success";
+    if (count <= 3) return "warning";
+    return "urgent";
+  };
+
   const dashboardCards = [
     {
       title: "Medicação",
       description: "Gerencie horários, alertas e histórico de medicamentos",
       icon: Pill,
-      pendingCount: 2,
-      status: "warning" as const,
+      pendingCount: pendencias,
+      status: getStatus(pendencias),
       onClick: () => navigate("/medicacao"),
     },
     {
       title: "Rotina & Calendário",
       description: "Organize atividades diárias e compromissos",
       icon: Calendar,
-      pendingCount: 0,
-      status: "success" as const,
+      pendingCount: pendencias,
+      status: getStatus(pendencias),
       onClick: () => navigate("/rotina"),
     },
     {
       title: "Comunicação",
       description: "Chat entre cuidadores e atualizações importantes",
       icon: MessageCircle,
-      pendingCount: 5,
-      status: "urgent" as const,
+      pendingCount: mensagensNaoLidas,
+      status: getStatus(mensagensNaoLidas),
       onClick: () => navigate("/comunicacao"),
     },
     {
