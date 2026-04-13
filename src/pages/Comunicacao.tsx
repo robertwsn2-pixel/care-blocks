@@ -156,6 +156,44 @@ const Comunicacao = () => {
     window.location.href = `tel:${telefone}`;
   };
 
+  // Realtime subscription for chat messages
+  useEffect(() => {
+    if (!contatoSelecionado || !user) return;
+
+    const channel = supabase
+      .channel(`chat-${contatoSelecionado.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'mensagens',
+          filter: `contato_id=eq.${contatoSelecionado.id}`,
+        },
+        (payload) => {
+          const newMsg = payload.new as any;
+          if (newMsg.user_id === user.id) {
+            setMensagens((prev) => [...prev, newMsg as Mensagem]);
+            // Mark as read if from contact
+            if (newMsg.enviado_por === 'contato') {
+              supabase
+                .from("mensagens")
+                .update({ lida: true })
+                .eq("id", newMsg.id);
+            }
+            setTimeout(() => {
+              scrollRef.current?.scrollIntoView({ behavior: "smooth" });
+            }, 100);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [contatoSelecionado, user]);
+
   const abrirChat = async (contato: Contato) => {
     setContatoSelecionado(contato);
     await loadMensagens(contato.id);
